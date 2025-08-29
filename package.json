@@ -2,11 +2,11 @@
   "name": "bajaj_hackathon",
   "version": "1.0.0",
   "description": "Bajaj Hackathon REST API",
-  "main": "source/server.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node source/server.js",
+    "start": "node src/server.js",
     "build": "echo 'Build complete'",
-    "dev": "node source/server.js"
+    "dev": "node src/server.js"
   },
   "keywords": ["api", "rest", "bajaj", "hackathon"],
   "author": "",

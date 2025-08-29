@@ -128,6 +128,8 @@ app.get("/bfhl", (req, res) => {
 
 app.get("/", (_req, res) => res.send("OK"));
 
+app.get("/health", (_req, res) => res.json("Server is running"));
+
 const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`API listening on http://localhost:${PORT}`);
