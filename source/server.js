@@ -24,7 +24,11 @@ function normalizeCandidate(value) {
   if (typeof value === "string") {
     const s = value.trim();
     if (!s) return null; 
-    if (isIntegerString(s) || isAlphaOnly(s)) return s;
+    if (s.length === 1) {
+      if (isIntegerString(s) || isAlphaOnly(s) || isSpecialChar(s)) return s;
+    } else {
+      if (isIntegerString(s) || isAlphaOnly(s)) return s;
+    }
     return null;
   }
   if (typeof value === "bigint") {
@@ -61,23 +65,48 @@ app.post("/bfhl", (req, res) => {
   let sum = 0n;
 
   for (const item of rawArray) {
-    const token = normalizeCandidate(item);
-    if (token === null) continue;
+    if (typeof item === "string") {
+      const trimmed = item.trim();
+      if (trimmed.length === 1) {
+        if (isIntegerString(trimmed)) {
+          const n = BigInt(trimmed);
+          sum += n;
+          (n % 2n === 0n ? even_numbers : odd_numbers).push(trimmed);
+        } else if (isAlphaOnly(trimmed)) {
+          alphabets.push(trimmed.toUpperCase());
+        } else {
+          special_characters.push(trimmed);
+        }
+        continue;
+      }
+      if (isIntegerString(trimmed)) {
+        const n = BigInt(trimmed);
+        sum += n;
+        (n % 2n === 0n ? even_numbers : odd_numbers).push(trimmed);
+      } else if (isAlphaOnly(trimmed)) {
+        alphabets.push(trimmed.toUpperCase());
+      }
+      continue;
+    }
 
-    if (isIntegerString(token)) {
-      const n = BigInt(token);
-      sum += n;
-      (n % 2n === 0n ? even_numbers : odd_numbers).push(token); 
-    } else if (isAlphaOnly(token)) {
-      alphabets.push(token.toUpperCase());
-    } else if (typeof item === "string" && isSpecialChar(item)) {
-      special_characters.push(item);
+    const token = normalizeCandidate(item);
+    if (token !== null) {
+      if (isIntegerString(token)) {
+        const n = BigInt(token);
+        sum += n;
+        (n % 2n === 0n ? even_numbers : odd_numbers).push(token);
+      } else if (isAlphaOnly(token)) {
+        alphabets.push(token.toUpperCase());
+      } else if (isSpecialChar(token)) {
+        special_characters.push(token);
+      }
     }
   }
 
-  const concat_string = alphabets.map((char, index) => 
+  const reversedAlphabets = alphabets.slice().reverse();
+  const concat_string = reversedAlphabets.map((char, index) => 
     index % 2 === 0 ? char.toUpperCase() : char.toLowerCase()
-  ).reverse().join("");
+  ).join("");
 
   return res.status(200).json({
     ...base,
@@ -99,7 +128,7 @@ app.get("/bfhl", (req, res) => {
 
 app.get("/", (_req, res) => res.send("OK"));
 
-const PORT = process.env.PORT || 8080;
+const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`API listening on http://localhost:${PORT}`);
 });
